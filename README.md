@@ -20,7 +20,7 @@ The results of the submitted tracker are obtained in the environment with the fo
 * python 2.7.12
 * PyTorch 0.2.0
 
-## Online Tracking
+## Online Tracking for OTB/UAV/TC128
 * Download the [pretrained model](https://pan.baidu.com/s/1A29veMG8rpqLonV6aufMEA)
 * python tracking/run_tracker.py
 ## Results:
