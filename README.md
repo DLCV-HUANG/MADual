@@ -3,7 +3,7 @@
 
 ## Introduction
 
-The code is partly created base on the [MDNet python-implemented](https://github.com/HyeonseobNam/py-MDNet) by Hyeonseob Nam and Bohyung Han at POSTECH. Many thanks to their team's work.
+The code is partly created base on the [MDNet python-implemented](https://github.com/HyeonseobNam/py-MDNet) by Hyeonseob Nam and Bohyung Han at POSTECH. Thanks to their team's work.
 
 
 ## Environment

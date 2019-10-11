@@ -53,7 +53,6 @@ class SampleGenerator():
         #
         # bb: target bbox (min_x,min_y,w,h)
         bb = np.array(bb, dtype='float32')
-        #print(1)
         # (center_x, center_y, w, h)
         sample = np.array([bb[0]+bb[2]/2, bb[1]+bb[3]/2, bb[2], bb[3]], dtype='float32')
         samples = np.tile(sample[None,:],(n,1))
@@ -62,7 +61,6 @@ class SampleGenerator():
         if self.aspect_f is not None:
             ratio = np.random.rand(n,1)*2-1
             samples[:,2:] *= self.aspect_f ** np.concatenate([ratio, -ratio],axis=1)
-            #print(2)
         # sample generation
         if self.type=='gaussian':
             samples[:,:2] += self.trans_f * np.mean(bb[2:]) * np.clip(0.5*np.random.randn(n,2),-1,1)
@@ -71,7 +69,6 @@ class SampleGenerator():
         elif self.type=='uniform':
             samples[:,:2] += self.trans_f * np.mean(bb[2:]) * (np.random.rand(n,2)*2-1)
             samples[:,2:] *= self.scale_f ** (np.random.rand(n,1)*2-1)
-            #print(3)
         elif self.type=='whole':
             m = int(2*np.sqrt(n))
             xy = np.dstack(np.meshgrid(np.linspace(0,1,m),np.linspace(0,1,m))).reshape(-1,2)
@@ -79,7 +76,6 @@ class SampleGenerator():
             samples[:,:2] = bb[2:]/2 + xy * (self.img_size-bb[2:]/2-1)
             #samples[:,:2] = bb[2:]/2 + np.random.rand(n,2) * (self.img_size-bb[2:]/2-1)
             samples[:,2:] *= self.scale_f ** (np.random.rand(n,1)*2-1)
-        #print(4)
         # adjust bbox range
         samples[:,2:] = np.clip(samples[:,2:], 10, self.img_size-10)
         if self.valid:
@@ -89,7 +85,6 @@ class SampleGenerator():
 
         # (min_x, min_y, w, h)
         samples[:,:2] -= samples[:,2:]/2
-        #print(5)
         return samples
 
     def set_trans_f(self, trans_f):

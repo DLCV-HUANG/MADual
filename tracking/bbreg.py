@@ -14,10 +14,6 @@ class BBRegressor():
         self.model = Ridge(alpha=self.alpha)
 
     def train(self, X,bbox, gt):
-        # X_vgg=F.sigmoid(X_vgg)
-        # X_c3d=F.sigmoid(X_c3d)
-        #
-        # X=torch.cat((X_vgg,X_c3d),dim=1)
         X = X.cpu().numpy()
         bbox = np.copy(bbox)
         gt = np.copy(gt)
