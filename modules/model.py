@@ -45,7 +45,10 @@ class MDNet(nn.Module):
     def __init__(self, vgg_model_path=None, c3d_model_path=None,K=1):
         super(MDNet, self).__init__()
         self.K = K
-
+		#Note:        
+		#Empirically proved that VGG-M with smaller stride is more conducive to the preformance fo VOT challenge. therefore
+		#recommend utilizing VGG-M instead of VGG-S for VOT evaluation.
+        # ---------------------------------VGG-S-----------------------
         self.layers_vgg = nn.Sequential(OrderedDict([
             ('conv1', nn.Sequential(nn.Conv2d(3, 96, kernel_size=7, stride=2, padding=1),
                                     nn.ReLU(),
@@ -65,7 +68,25 @@ class MDNet(nn.Module):
             ('fc5', nn.Sequential(nn.Dropout(0.5),
                                   nn.Linear(2048, 2048),
                                   nn.ReLU()))]))
-
+        # ---------------------------------VGG-S-----------------------
+        #---------------------------------VGG-M-----------------------
+        # self.layers_vgg = nn.Sequential(OrderedDict([
+        #     ('conv1', nn.Sequential(nn.Conv2d(3, 96, kernel_size=7, stride=2),
+        #                             nn.ReLU(inplace=True),
+        #                             LRN(),
+        #                             nn.MaxPool2d(kernel_size=3, stride=2))),
+        #     ('conv2', nn.Sequential(nn.Conv2d(96, 256, kernel_size=5, stride=2),
+        #                             nn.ReLU(inplace=True),
+        #                             LRN(),
+        #                             nn.MaxPool2d(kernel_size=3, stride=2))),
+        #     ('conv3', nn.Sequential(nn.Conv2d(256, 512, kernel_size=3, stride=1),
+        #                             nn.ReLU(inplace=True))),
+        #     ('fc4', nn.Sequential(nn.Linear(512 * 3 * 3, 512),
+        #                           nn.ReLU(inplace=True))),
+        #     ('fc5', nn.Sequential(nn.Dropout(0.5),
+        #                           nn.Linear(512, 512),
+        #                           nn.ReLU(inplace=True)))]))
+        # ---------------------------------VGG-M-----------------------
         self.layers_c3d=nn.Sequential(OrderedDict([
             ('onv1_c3d', nn.Sequential(nn.Conv3d(3, 64, kernel_size=(3,3,3), padding=(1, 1, 1)),
                                        nn.ReLU(),
@@ -90,6 +111,9 @@ class MDNet(nn.Module):
             ('conv5b_c3d', nn.Sequential(
                                      nn.Conv3d(512, 512, kernel_size=(3, 3, 3), padding=(1, 1, 1)),
                                         nn.ReLU(),
+                                        #VGG-M
+                                        #nn.MaxPool3d(kernel_size=(2, 2, 2), stride=(2, 2, 2))))]))
+                                        #VGG-S
                                      nn.MaxPool3d(kernel_size=(2, 1,1), stride=(2, 1,1))))]))
         self.branches = nn.ModuleList([nn.Sequential(nn.Dropout(0.5),
                                                      nn.Linear(2048, 2)) for _ in range(K)])
@@ -187,6 +211,7 @@ class MDNet(nn.Module):
         shared_layers = states['shared_layers_c3d']
         self.layers_c3d.load_state_dict(shared_layers)
 
+    # ---------------------------------VGG-S-----------------------
     def load_mat_model_vgg(self, matfile):
         mat = scipy.io.loadmat(matfile)
         mat_layers = list(mat['layers'])[0]
@@ -194,6 +219,19 @@ class MDNet(nn.Module):
             weight, bias = mat_layers[x]['weights'].item()[0]
             self.layers_vgg[i][0].weight.data = torch.from_numpy(np.transpose(weight, (3, 2, 0, 1)))
             self.layers_vgg[i][0].bias.data = torch.from_numpy(bias[:, 0])
+    # ---------------------------------VGG-S-----------------------
+
+    # ---------------------------------VGG-M-----------------------
+    # def load_mat_model_vgg(self, matfile):
+    #     mat = scipy.io.loadmat(matfile)
+    #     mat_layers = list(mat['layers'])[0]
+    #
+    #     # copy conv weights
+    #     for i in range(3):
+    #         weight, bias = mat_layers[i * 4]['weights'].item()[0]
+    #         self.layers[i][0].weight.data = torch.from_numpy(np.transpose(weight, (3, 2, 0, 1)))
+    #         self.layers[i][0].bias.data = torch.from_numpy(bias[:, 0])
+    # ---------------------------------VGG-M-----------------------
     def load_pkl_model_c3d(self, pklfile,matfile):
         pkl = torch.load(pklfile)
         self.layers_c3d[0][0].weight.data = pkl['conv1.weight']
